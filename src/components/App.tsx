@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {  useState } from "react";
 import Background from "./Background";
 import Container from "./Container";
 import Footer from "./Footer";
@@ -12,12 +12,21 @@ import JobList from "./JobList";
 import Pagination from "./PaginationControls";
 import JobItemContent from "./JobItemContent";
 import Sidebar, { SidebarTop } from "./Sidebar";
-import {useJobItemsCustomHook} from "../../lib/hooks"
+import { useDebounce, useJobItemsCustomHook} from "../lib/hooks"
+
 
 function App() {
   const [searchText,setSearchText] = useState("");  
+  // when you return data from  a custom hook in array you dont have to have concern about the variable names which you are importing
+  //but when you return object you cant change the variable names you have to keep the variable names same as they
+  //were in return statement in your hook
+  
+  const debouncedSearchText = useDebounce(searchText,250);
+  const {isLoading,jobItems} = useJobItemsCustomHook(debouncedSearchText);
 
-  const {isLoading,jobItems} = useJobItemsCustomHook(searchText);
+  const slicedJobItems = jobItems.slice(0,7);
+  const totalSearchresults = jobItems.length;
+ 
 
   return <>
         <Background/>
@@ -33,10 +42,10 @@ function App() {
         <Container>
           <Sidebar>
             <SidebarTop>
-              <ResultsCount/>
+              <ResultsCount totalSearchresults={totalSearchresults}/>
               <Sorting/>
             </SidebarTop>
-            <JobList jobItems={jobItems} isLoading={isLoading}/>
+            <JobList jobItems={slicedJobItems} isLoading={isLoading}/>
             <Pagination/>
           </Sidebar>
           <JobItemContent/>
