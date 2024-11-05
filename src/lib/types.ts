@@ -22,5 +22,14 @@ export type extendedJobItem = JobItem & {
 export type JobItemApiResponse = {
     public : boolean;
     jobItem : extendedJobItem;
-  }
+}
+
+export  type JobItemsApiResponse =  {
+    public : boolean;
+    sorted : boolean;
+    jobItems : JobItem[];
+}
+
+export type sortBy = 'recent'|'relevant' ;
+
   

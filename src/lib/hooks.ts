@@ -1,38 +1,73 @@
 import { useEffect, useState } from "react";
-import {  JobItem, JobItemApiResponse } from "./types";
+import {JobItemApiResponse, JobItemsApiResponse } from "./types";
 import { BASE_API_URL } from "./constants";
 import { useQuery } from "@tanstack/react-query";
 
-export function useJobItemsCustomHook(searchText:string){
-    const [jobItems,setJobItems] = useState<JobItem[]>([]);
-    
-    const [isLoading,setIsLoading] = useState(false);
-  
-    useEffect(()=>{
-      if(!searchText) return;
-      
-      const fetchData = async ()=> {
-        setIsLoading(true);
-        const response = await fetch(`${BASE_API_URL}?search=${searchText}`);
-        const data = await response.json();
-        setIsLoading(false);
-        setJobItems(data.jobItems);
-        
-      }
-  
-      fetchData();
-  
-    },[searchText])
-    // return {
-    //     isLoading,slicedJobItems
-    // }
+import { errorMessage } from "./utils";
 
-    //we can return array also as const it solves the problem of using same variable name in required place but it creates
-    // a problem as we have to now remember the order of variables and this is not practical to always remember the variable names
-    // also what if we require only one value out of three in that case array cant help us so thatswhy object is more 
-    //preferrabe if we want to use a variable with other name we can just destructure it there  
-    return {isLoading,jobItems};
-}
+// export function useJobItemsCustomHook(searchText:string){
+//     const [jobItems,setJobItems] = useState<JobItem[]>([]);
+    
+//     const [isLoading,setIsLoading] = useState(false);
+  
+//     useEffect(()=>{
+//       if(!searchText) return;
+      
+//       const fetchData = async ()=> {
+//         setIsLoading(true);
+//         const response = await fetch(`${BASE_API_URL}?search=${searchText}`);
+//         const data = await response.json();
+//         setIsLoading(false);
+//         setJobItems(data.jobItems);
+        
+//       }
+  
+//       fetchData();
+  
+//     },[searchText])
+//     // return {
+//     //     isLoading,slicedJobItems
+//     // }
+
+//     //we can return array also as const it solves the problem of using same variable name in required place but it creates
+//     // a problem as we have to now remember the order of variables and this is not practical to always remember the variable names
+//     // also what if we require only one value out of three in that case array cant help us so thatswhy object is more 
+//     //preferrabe if we want to use a variable with other name we can just destructure it there  
+//     return {isLoading,jobItems};
+// }
+
+ 
+
+  const fetchJobItemsData = async (searchText:string):Promise<JobItemsApiResponse> => {
+    const response = await fetch(`${BASE_API_URL}?search=${searchText}`);
+        
+    if(!response.ok){
+      const errorData = await response.json();
+      throw new Error(errorData.description);
+    }
+    const data = await response.json();
+    return data;
+  }
+
+  export function useJobItems(searchText:string){
+    const {data,isInitialLoading} = useQuery(
+      ["job-items",searchText],
+  
+      ()=> (fetchJobItemsData(searchText)),
+      {
+        staleTime : 1000*60*60,
+        refetchOnWindowFocus : false,
+        retry : false,
+        enabled : Boolean(searchText),
+        //toaster error message
+        onError : errorMessage
+      }
+    );
+      console.log(data);
+      const jobItems = data?.jobItems;
+      const isLoading = isInitialLoading;
+      return {jobItems,isLoading} as const;
+  }
 
 
   export function useCurrentIdHook(){
@@ -98,7 +133,7 @@ export function useJobItem(id:number | null){
       refetchOnWindowFocus : false,
       retry : false,
       enabled : Boolean(id),
-      onError : (error) =>{console.log(error)}
+      onError : errorMessage
     }
   );
     const jobItem = data?.jobItem;

@@ -1,13 +1,21 @@
-export default function Sorting() {
+type SortByProps = {
+  onclick : (newSortBy: 'recent'|'relevant')=>void;
+  sortBy : 'recent'|'relevant';
+}
+
+export default function Sorting({onclick,sortBy}:SortByProps) {
   return (
     <section className="sorting">
       <i className="fa-solid fa-arrow-down-short-wide"></i>
 
-      <button className="sorting__button sorting__button--relevant">
+      <button 
+        onClick={()=>onclick("relevant")}
+        className={`sorting__button sorting__button--relevant ${sortBy==='relevant'?'sorting__button--active':''}`}>
         Relevant
       </button>
 
-      <button className="sorting__button sorting__button--recent">
+      <button onClick={()=>onclick("recent")}
+      className={`sorting__button sorting__button--recent ${sortBy==='recent'?'sorting__button--active':''}`}>
         Recent
       </button>
     </section>
