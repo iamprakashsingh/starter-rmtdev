@@ -14,7 +14,7 @@ import JobItemContent from "./JobItemContent";
 import Sidebar, { SidebarTop } from "./Sidebar";
 import { useDebounce, useJobItems} from "../lib/hooks"
 import { Toaster } from "react-hot-toast";
-import { sortBy } from "../lib/types";
+import { direction, sortBy } from "../lib/types";
 
 
 function App() {
@@ -27,42 +27,53 @@ function App() {
   const {isLoading,jobItems} = useJobItems(debouncedSearchText);
   const [currentPage,setCurrentPage] = useState(1);
   const [sortBy,setSortBy] = useState<sortBy>("relevant");
+  const [bookmarkedIds,setBookmarkedIds] = useState([]);
+
+  
+
   const handleChangeSortBy = (newSortBy: sortBy) => {
+    setCurrentPage(1);
     setSortBy(newSortBy);
   }
   const totalSearchresults = jobItems?.length || 0;
   
   const lastPage = (totalSearchresults || 0) / 7;
 
-  const jobItemsSorted = jobItems?.sort((a,b)=>{
-    if(sortBy==="relevant"){
-      return b.relevanceScore - a.relevanceScore;
-    }
-    else {
-      return a.daysAgo-b.daysAgo;
-    }
+  const jobItemsSorted = [...(jobItems)]?.sort((a,b)=>{
+      if(sortBy==="relevant"){
+        return b.relevanceScore - a.relevanceScore;
+      }
+      else {
+        
+        return a.daysAgo-b.daysAgo;
+      }
   })
   let slicedJobItems;
   if(jobItemsSorted){
-    slicedJobItems = jobItemsSorted?.slice((currentPage-1)*7+1,currentPage*7+1) || [];
+    slicedJobItems = jobItemsSorted?.slice((currentPage-1)*7+1,currentPage*7+1);
   }
   else{
-    slicedJobItems = jobItems?.slice((currentPage-1)*7+1,currentPage*7+1) || [];
+    slicedJobItems = jobItems?.slice((currentPage-1)*7+1,currentPage*7+1);
   }
  
-  const handleChangePage = (direction : "next" | "previous")=>{
-    if(direction==='next'){
-      setCurrentPage((prev)=>prev+1);
-    }
-    else if(direction === "previous"){
-      setCurrentPage((prev)=>prev-1);
-    }
+  const handleChangePage = (direction : direction)=>{
+      if(direction==='next'){
+        setCurrentPage((prev)=>prev+1);
+      }
+      else if(direction === "previous"){
+        setCurrentPage((prev)=>prev-1);
+      }
   }
 
+  const handleToggleBookmark = (id)=>{
+    if(bookmarkedIds.includes(id)){
+      setBookmarkedIds((prev) => prev.filter((item)=>item!==id));
+    }
+    else{
+      setBookmarkedIds((prev)=>[...prev,id]);
+    }
+  }
   
-
-  
-
   return <>
         <Background/>
 

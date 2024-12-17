@@ -32,4 +32,4 @@ export  type JobItemsApiResponse =  {
 
 export type sortBy = 'recent'|'relevant' ;
 
-  
+export type direction = 'next' | 'previous';

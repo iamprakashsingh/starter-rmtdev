@@ -64,7 +64,8 @@ import { errorMessage } from "./utils";
       }
     );
       console.log(data);
-      const jobItems = data?.jobItems;
+      // const jobItems = data?.jobItems;
+      const jobItems = data ? data.jobItems : [];
       const isLoading = isInitialLoading;
       return {jobItems,isLoading} as const;
   }

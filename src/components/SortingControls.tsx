@@ -1,6 +1,8 @@
+import { sortBy } from "../lib/types";
+
 type SortByProps = {
-  onclick : (newSortBy: 'recent'|'relevant')=>void;
-  sortBy : 'recent'|'relevant';
+  onclick : (newSortBy: sortBy)=>void;
+  sortBy : sortBy;
 }
 
 export default function Sorting({onclick,sortBy}:SortByProps) {
